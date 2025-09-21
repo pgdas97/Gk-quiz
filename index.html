@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>GK Competition Exam</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f0f4f8;
+      margin: 0;
+      padding: 0;
+    }
+    .container {
+      max-width: 600px;
+      margin: 30px auto;
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    h2 {
+      text-align: center;
+      color: #333;
+    }
+    .question {
+      margin-bottom: 20px;
+    }
+    .options label {
+      display: block;
+      margin: 5px 0;
+    }
+    .submit-btn {
+      background: #28a745;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      cursor: pointer;
+      width: 100%;
+      font-size: 16px;
+      border-radius: 5px;
+    }
+    .scorecard {
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Quiz Form -->
+  <div class="container" id="quiz-container">
+    <h2>GK Competition Exam</h2>
+    <label for="name">Enter your name:</label>
+    <input type="text" id="name" required style="width:100%; padding:8px; margin-bottom:20px;"/>
+
+    <div class="question">
+      <p>1. What is the capital of France?</p>
+      <div class="options">
+        <label><input type="radio" name="q1" value="Paris" /> Paris</label>
+        <label><input type="radio" name="q1" value="London" /> London</label>
+        <label><input type="radio" name="q1" value="Rome" /> Rome</label>
+      </div>
+    </div>
+
+    <div class="question">
+      <p>2. Who wrote the Indian National Anthem?</p>
+      <div class="options">
+        <label><input type="radio" name="q2" value="Tagore" /> Rabindranath Tagore</label>
+        <label><input type="radio" name="q2" value="Gandhi" /> Mahatma Gandhi</label>
+        <label><input type="radio" name="q2" value="Nehru" /> Jawaharlal Nehru</label>
+      </div>
+    </div>
+
+    <div class="question">
+      <p>3. Which planet is known as the Red Planet?</p>
+      <div class="options">
+        <label><input type="radio" name="q3" value="Mars" /> Mars</label>
+        <label><input type="radio" name="q3" value="Jupiter" /> Jupiter</label>
+        <label><input type="radio" name="q3" value="Saturn" /> Saturn</label>
+      </div>
+    </div>
+
+    <div class="question">
+      <p>4. What is the national animal of India?</p>
+      <div class="options">
+        <label><input type="radio" name="q4" value="Tiger" /> Tiger</label>
+        <label><input type="radio" name="q4" value="Elephant" /> Elephant</label>
+        <label><input type="radio" name="q4" value="Lion" /> Lion</label>
+      </div>
+    </div>
+
+    <div class="question">
+      <p>5. Which is the longest river in the world?</p>
+      <div class="options">
+        <label><input type="radio" name="q5" value="Nile" /> Nile</label>
+        <label><input type="radio" name="q5" value="Amazon" /> Amazon</label>
+        <label><input type="radio" name="q5" value="Ganges" /> Ganges</label>
+      </div>
+    </div>
+
+    <button class="submit-btn" onclick="submitQuiz()">Submit</button>
+  </div>
+
+  <!-- Result -->
+  <div class="container scorecard" id="result-container" style="display: none;"></div>
+
+  <!-- JS Libraries -->
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
+
+  <script>
+    // Initialize EmailJS
+    emailjs.init("Ah2KJJtjwnL00jKZN"); // ✅ Replace with your actual Public Key
+
+    const answers = {
+      q1: "Paris",
+      q2: "Tagore",
+      q3: "Mars",
+      q4: "Tiger",
+      q5: "Nile"
+    };
+
+    function submitQuiz() {
+      const name = document.getElementById("name").value.trim();
+      if (!name) {
+        alert("Please enter your name.");
+        return;
+      }
+
+      let score = 0;
+      for (let i = 1; i <= 5; i++) {
+        const answer = document.querySelector(`input[name="q${i}"]:checked`);
+        if (answer && answer.value === answers[`q${i}`]) {
+          score++;
+        }
+      }
+
+      // Show Scorecard
+      const resultContainer = document.getElementById("result-container");
+      resultContainer.innerHTML = `
+        <h2>Scorecard</h2>
+        <p><strong>Name:</strong> ${name}</p>
+        <p><strong>Score:</strong> ${score} / 5</p>
+      `;
+      document.getElementById("quiz-container").style.display = "none";
+      resultContainer.style.display = "block";
+
+      // Take Screenshot
+      html2canvas(resultContainer).then(canvas => {
+        canvas.toBlob(blob => {
+          const reader = new FileReader();
+          reader.onloadend = function () {
+            const base64data = reader.result;
+            sendScreenshotEmail(name, score, base64data);
+          };
+          reader.readAsDataURL(blob);
+        });
+      });
+    }
+
+    function sendScreenshotEmail(name, score, base64Image) {
+      emailjs.send("service_ylg7h1h", "template_9edx7op", {
+        to_name: name,
+        message: `Score: ${score}/5`,
+        screenshot: base64Image
+      }).then(function (response) {
+        alert("✅ Screenshot sent successfully via Email!");
+      }, function (error) {
+        alert("❌ Error sending email: " + JSON.stringify(error));
+      });
+    }
+  </script>
+</body>
+</html>
